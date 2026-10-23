@@ -1,0 +1,58 @@
+services:
+  kafka:
+    image: bitnamilegacy/kafka:3.5.1                       # apache/kafka:latest
+    restart: on-failure
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_CFG_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_NUM_PARTITIONS=3
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+
+  # Apache ZooKeeper is an open-source, centralized service for maintaining
+  # configuration information, naming, and providing distributed synchronization
+  # and group services in large-scale distributed systems.
+  zookeeper:
+    image: bitnamilegacy/zookeeper:3.9.3-debian-12-r22     # bitnamilegacy/zookeeper:latest # bitnami/zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  # Kafka UI is a free, open-source web-based management tool used to monitor 
+  # and administer Apache Kafka clusters.
+  kafka-ui:
+    image: kafbat/kafka-ui:latest                          # provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+      - zookeeper
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=BRDataSUS
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+
+  producer:
+    container_name: producer
+    build:
+      context: ./producer
+    restart: on-failure
+    depends_on:
+      - kafka
+
+  consumer:
+    container_name: consumer
+    build:
+      context: ./consumer
+    restart: on-failure
+    depends_on:
+      - kafka

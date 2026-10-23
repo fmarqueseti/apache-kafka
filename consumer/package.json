@@ -1,0 +1,13 @@
+{
+  "name": "kafka-temperature-consumer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Consumes simulated IoT sensor readings from Apache Kafka",
+  "main": "consumer.js",
+  "scripts": {
+    "start": "node consumer.js"
+  },
+  "dependencies": {
+    "kafkajs": "^2.2.4"
+  }
+}
